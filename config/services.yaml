@@ -29,3 +29,9 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Command\SetupStorageCommand:
+        tags:
+            - { name: 'console.command', command: 'app:setup-storage' }
+        arguments:
+            $resources: '%kernel.project_dir%/resources'

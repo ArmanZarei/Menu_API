@@ -4,7 +4,10 @@ namespace App\Repository;
 
 use App\Entity\Food;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
+use function Doctrine\ORM\QueryBuilder;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\expr;
 
 /**
  * @method Food|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,32 +22,23 @@ class FoodRepository extends ServiceEntityRepository
         parent::__construct($registry, Food::class);
     }
 
-    // /**
-    //  * @return Food[] Returns an array of Food objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('f')
-            ->andWhere('f.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('f.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Food
+    public function showAvailableFoods()
     {
-        return $this->createQueryBuilder('f')
-            ->andWhere('f.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $now = new \DateTime('now');
+        $qb = $this->createQueryBuilder('f');
+        $qb2 = $this->createQueryBuilder('food');
+        $qb
+            ->select('f.id')
+            ->join('f.ingredients','i',Join::WITH , $qb->expr()->orX(
+                $qb->expr()->eq('i.stock',0),
+                $qb->expr()->lt('i.expires_at',':expire_time')
+            ));
+        $result = $qb2
+            ->where($qb2->expr()->notIn('food.id',$qb->getDQL()))
+            ->setParameter('expire_time',$now->format('Y-m-d H:i:s'))
+            ->getQuery()->getResult();
+        return $result;
     }
-    */
+
 }

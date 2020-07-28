@@ -9,4 +9,6 @@
 /vendor/
 /.idea
 /.env
+/mysql/
+.gitignore
 ###< symfony/framework-bundle ###
